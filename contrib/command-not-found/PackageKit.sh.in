@@ -30,7 +30,13 @@ command_not_found_handle () {
 		'@LIBEXECDIR@/pk-command-not-found' "$@"
 		retval=$?
 	elif [[ -n "${BASH_VERSION-}" ]]; then
-		printf >&2 'bash: %s%s\n' "${1:+$1: }" "$(gettext PackageKit 'command not found')"
+		local msg='command not found'
+
+		# a missing gettext would run this handler again, recursing forever
+		if command -v gettext >/dev/null 2>&1; then
+			msg=$(gettext PackageKit "$msg")
+		fi
+		printf >&2 'bash: %s%s\n' "${1:+$1: }" "$msg"
 	fi
 
 	# return success or failure
